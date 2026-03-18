@@ -4,95 +4,33 @@
 
 > 为 AI Agent 赋能，提供结构化能力与智能工作流。
 
-## 📖 简介
+**Erduo Skills** 是一个 AI Agent 技能库，收录了一系列可被 Agent 直接调用的结构化技能。每个技能都是独立的、可组合的工作流单元，覆盖信息获取、内容处理、图像工具等场景。
 
-**Erduo Skills** 是一个专门用于管理 AI Agent 智能技能的仓库。它作为一个知识库和执行框架，使 Agent 能够执行自动新闻报道、数据分析等复杂任务。
+## 技能一览
+
+| 技能 | 简介 | 调用方式 |
+|------|------|----------|
+| [每日日报](#-每日日报) | 多源抓取 + 智能筛选，自动生成技术日报 | Agent 调用 |
+| [AK RSS Digest](#-ak-rss-digest) | 固定 RSS 源精选摘要，10 分制打分过滤 | Agent 调用 / CLI |
+| [转录文本精修师](#-转录文本精修师) | 语音转录文本 → 可读文章，保留原汁原味 | Agent 调用 |
+| [Gemini 水印移除](#-gemini-水印移除) | 逆向 Alpha 混合去除 Gemini 图片水印 | CLI |
 
 ---
 
-## ✨ 技能：AK RSS Digest
-
-**AK RSS Digest** 是一个面向 AI Agent 阅读场景的精选 RSS 摘要技能。它会从固定的 RSS/Atom 源列表中抓取最近一周的文章，优先筛选 AI agent、前沿 AI 判断、深度访谈和不太枯燥的高信息密度内容。
-
-### 🚀 核心特性
-
-- **固定信源聚合**:
-  - 使用预设 RSS/Atom 源清单，避免每次重新找源。
-  - 默认抓取最近 7 天，也支持显式指定某一天。
-
-- **智能打分与筛选**:
-  - 对候选文章按 10 分制打分。
-  - 只输出高于 7 分的内容，过滤纯论文、发布说明和过于枯燥的技术条目。
-
-- **中文日报口吻输出**:
-  - 输出统一采用中文字段：标题、评分、推荐语、摘要、链接。
-  - 风格偏简洁日报，不写成冗长报告。
-
-### 💻 使用方法
-
-该技能适合通过 Agent 直接调用，也可以使用内置脚本先抓取候选文章：
+## 🗞 每日日报
 
 ```bash
-python skills/ak-rss-digest/scripts/fetch_today_feed_items.py --format json
+npx skills add rookie-ricardo/erduo-skills --skill daily-news-report
 ```
 
-- 默认抓取最近一周的文章
-- 如需只看某一天，可加 `--date YYYY-MM-DD --days 1`
+自动从多个优质信源抓取、筛选并总结技术新闻，生成结构化日报。
 
-*提示词示例:*
-> “用 `$ak-rss-digest` 拉取最近一周的 RSS，筛出 7 分以上的文章，按中文日报格式输出。”
-
-### 📄 目录说明
-
-- `skills/ak-rss-digest/SKILL.md`: 技能主说明与筛选规则
-- `skills/ak-rss-digest/scripts/fetch_today_feed_items.py`: RSS 抓取脚本
-- `skills/ak-rss-digest/references/feeds.opml`: 固定 RSS 源列表
-
----
-
-## ✨ 技能：Gemini 水印移除
-
-**Gemini Watermark Remover** 是一个利用逆向 Alpha 混合技术去除 Gemini 生成图片水印的工具。适用于需要批量处理 Gemini 图片或集成去水印功能的场景。
-
-### 🚀 核心特性
-
-- **精准去水印**:
-  - 针对 Gemini 图片右下角水印进行像素级还原。
-  - 使用预制 Alpha 遮罩（48px/96px）确保高质量去除。
-  
-- **纯 Python 实现**:
-  - 核心算法仅依赖 Pillow，轻量且易于修改。
-  - 提供 CLI 命令行工具，方便集成到工作流中。
-
-### 💻 使用方法
-
-该技能需要两个参数：输入图片路径和输出图片路径。
-
-```bash
-python skills/gemini-watermark-remover/scripts/remove_watermark.py <input-image> <output-image>
-```
-
-- `input-image`: 包含 Gemini 水印的原始图片路径
-- `output-image`: 去除水印后的图片保存路径
-
-### 📄 效果
-
-- 如果你需要调整检测规则，可以参考 `skills/gemini-watermark-remover/references/algorithm.md`。
-
----
-
-## ✨ 精选技能：每日日报
-
-**每日日报** 是一个高级技能，旨在自动从多个来源抓取、筛选并总结高质量的技术新闻。
-
-### 🏗 核心架构
-
-该技能采用 **Master-Worker** 架构，包含智能调度器和专用子 Agent。
+采用 Master-Worker 架构：主 Agent 负责调度与决策，子 Agent 并行抓取，支持无头浏览器处理 JS 渲染页面。
 
 ```mermaid
 graph TD
     User((User)) -->|Start| Master[Master Agent<br>调度/监控/决策]
-    
+
     subgraph Execution Layer [SubAgent 执行层]
         WorkerA[Worker A<br>WebFetch]
         WorkerB[Worker B<br>WebFetch]
@@ -111,68 +49,133 @@ graph TD
     Master -->|Update| Cache[Smart Cache<br>智能缓存]
 ```
 
-### 🚀 核心特性
+- 聚合 HackerNews、HuggingFace Papers、ProductHunt 等多层级信源
+- 10 分制打分 + 内容去重（URL + 内容哈希双重校验）
+- 早停机制：收集到 20+ 高质量条目即停止，节省资源
+- 输出 Markdown 日报至 `NewsReport/` 目录
 
-- **多源抓取**:
-  - 聚合 HackerNews, HuggingFace Papers 等优质源。
-  
-- **智能筛选**:
-  - 筛选高质量技术内容，排除营销软文。
-  
-- **动态调度**:
-  - 采用“早停机制”：一旦抓取到足够的高质量条目（如 20 条），即停止抓取以节省资源。
+*提示词示例：*
+> "生成今天的日报。"
 
-- **无头浏览器支持**:
-  - 使用 MCP Chrome DevTools 处理复杂的 JS 渲染页面（如 ProductHunt）。
+---
 
-### 📄 输出示例
+## 📰 AK RSS Digest
 
-日报以结构化 Markdown 格式生成，存储在 `NewsReport/` 目录下。
+```bash
+npx skills add rookie-ricardo/erduo-skills --skill ak-rss-digest
+```
 
-> **Daily News Report (2024-03-21)**
->
-> **1. 文章标题**
-> - **摘要**: 文章内容的简要总结...
-> - **要点**: 
->   1. 要点一
->   2. 要点二
-> - **来源**: [链接](...) 
-> - **评分**: ⭐⭐⭐⭐⭐
+从固定 RSS/Atom 源中精选高质量文章，聚焦 AI agent、前沿 AI 判断、深度访谈等高信息密度内容。
+
+- 预设信源清单，默认抓取最近 7 天
+- 10 分制打分，仅输出 7 分以上内容
+- 过滤纯论文摘要、厂商营销、SEO 水文
+- 中文日报口吻输出：标题、评分、推荐语、摘要、链接
+
+```bash
+# 也可直接运行抓取脚本
+python skills/ak-rss-digest/scripts/fetch_today_feed_items.py --format json
+
+# 指定某一天
+python skills/ak-rss-digest/scripts/fetch_today_feed_items.py --date 2026-03-18 --days 1
+```
+
+*提示词示例：*
+> "用 `$ak-rss-digest` 拉取最近一周的 RSS，筛出 7 分以上的文章，按中文日报格式输出。"
+
+---
+
+## ✍️ 转录文本精修师
+
+```bash
+npx skills add rookie-ricardo/erduo-skills --skill transcript-polisher
+```
+
+将语音转录文本（访谈、演讲、播客、会议）精修为高可读性文章。核心原则：文字精修师，不是内容概括师——保留原句原词，拒绝高度概括。
+
+- 自动识别"单人表达"或"多人对谈"模式
+- 精准降噪：删除口水词（然后、那个、呃）、无意义附和（对对对、没错）
+- 同音字纠错 + 专有名词修正
+- 语义呼吸分段：按意群重组段落，而非机械按长度切割
+- 长文本自动分 chunk（~5000 字），子 Agent 并行处理后合并
+
+输入格式：
+
+```
+视频标题：xxx
+视频作者：xxx
+视频时长：xxx
+
+--- 字幕内容 ---
+<字幕文本>
+```
+
+输出格式：
+
+```
+## 视频信息
+标题 / 作者 / 时长
+
+## 导读
+核心思想总结
+
+## 正文
+精修后的全文
+```
+
+---
+
+## 🖼 Gemini 水印移除
+
+```bash
+npx skills add rookie-ricardo/erduo-skills --skill gemini-watermark-remover
+```
+
+利用逆向 Alpha 混合算法去除 Gemini 生成图片右下角的水印，像素级还原。
+
+- 纯 Python 实现，仅依赖 Pillow
+- 预制 Alpha 遮罩：48px（小图）/ 96px（>1024x1024 大图）
+- 算法原理：`original = (watermarked - alpha × logo) / (1 - alpha)`
+
+```bash
+python skills/gemini-watermark-remover/scripts/remove_watermark.py <输入图片> <输出图片>
+```
+
+算法细节参见 `skills/gemini-watermark-remover/references/algorithm.md`
 
 ---
 
 ## 📂 项目结构
 
-```bash
+```
+erduo-skills/
 ├── .claude/
-│   └── agents/       # Agent 定义 (Personas & Prompts)
-├── skills/           # 技能实现 (例如 daily-news-report)
-│   └── daily-news-report/  # 每日日报技能
-│   └── ak-rss-digest/      # RSS 精选摘要技能
-├── NewsReport/       # 生成的日报存档
-├── README.md         # 项目文档 (默认为中文)
-└── README_EN.md      # 英文项目文档
+│   └── agents/                     # Agent 定义
+├── skills/
+│   ├── daily-news-report/          # 每日日报
+│   │   ├── SKILL.md
+│   │   ├── sources.json
+│   │   └── cache.json
+│   ├── ak-rss-digest/             # RSS 精选摘要
+│   │   ├── SKILL.md
+│   │   ├── scripts/
+│   │   └── references/feeds.opml
+│   ├── transcript-polisher/        # 转录文本精修师
+│   │   ├── SKILL.md
+│   │   └── references/
+│   └── gemini-watermark-remover/   # Gemini 水印移除
+│       ├── SKILL.md
+│       ├── scripts/
+│       ├── assets/
+│       └── references/
+├── NewsReport/                     # 生成的日报存档
+├── README.md
+└── README_EN.md
 ```
 
-## 🛠 使用方法
+## 🤝 贡献
 
-1.  **克隆仓库**
-    ```bash
-    git clone https://github.com/Start-to-DJ/erduo-skills.git
-    cd erduo-skills
-    ```
-
-2.  **使用 Agent 运行**
-    将此仓库加载到您的 Agent 环境中（例如 Claude Desktop 或支持 MCP 的 Zed）。Agent 将自动识别 `daily-news-report`、`ak-rss-digest` 等技能。
-
-    *提示词示例:*
-    > “生成今天的日报。”
-    
-    > “用 `$ak-rss-digest` 生成最近一周值得看的 RSS 摘要。”
-
-## 🤝 贡献指南
-
-欢迎贡献！如果您有新的技能想法，请参考 `.claude/skills` 目录下的示例。
+欢迎贡献新技能！每个技能是 `skills/` 下的独立目录，包含 `SKILL.md`（技能定义）和相关脚本/资源。
 
 ---
 

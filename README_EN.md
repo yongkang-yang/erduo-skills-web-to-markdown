@@ -4,95 +4,33 @@
 
 > Empowering AI Agents with structured capabilities and intelligent workflows.
 
-## 📖 Overview
+**Erduo Skills** is an AI Agent skill library — a collection of structured, composable workflow units that agents can invoke directly. Skills cover information retrieval, content processing, image tooling, and more.
 
-**Erduo Skills** is a specialized repository designed to house and manage intelligent skills for AI agents. It serves as a knowledge base and execution framework, enabling agents to perform complex tasks such as autonomous news reporting, data analysis, and more.
+## Skills at a Glance
+
+| Skill | Description | Invocation |
+|-------|-------------|------------|
+| [Daily News Report](#-daily-news-report) | Multi-source scraping + smart filtering → tech daily report | Agent |
+| [AK RSS Digest](#-ak-rss-digest) | Curated RSS digest with 10-point scoring | Agent / CLI |
+| [Transcript Polisher](#-transcript-polisher) | Speech transcript → readable article, preserving original voice | Agent |
+| [Gemini Watermark Remover](#-gemini-watermark-remover) | Reverse alpha blending to remove Gemini image watermarks | CLI |
 
 ---
 
-## ✨ Skill: AK RSS Digest
-
-**AK RSS Digest** is a curated RSS reading skill for AI-agent-heavy workflows. It pulls from a fixed RSS/Atom bundle, defaults to the latest 7 days, and prioritizes articles about AI agents, frontier AI thinking, deep interviews, and other high-signal non-boring reads.
-
-### 🚀 Key Features
-
-- **Fixed Feed Bundle**:
-  - Uses a predefined RSS/Atom source list instead of rediscovering feeds each run.
-  - Defaults to the latest week, with an option to narrow to a single day.
-
-- **Scoring and Filtering**:
-  - Scores candidate articles on a 10-point scale.
-  - Only outputs items above 7, filtering out dry papers, release notes, and overly narrow technical logs.
-
-- **Chinese Daily-Brief Output**:
-  - Final output uses Chinese labels for title, score, recommendation, summary, and link.
-  - Tone is intentionally brief and digest-like rather than formal.
-
-### 💻 Usage
-
-The skill is designed for agent invocation, but you can also run the bundled fetcher directly:
+## 🗞 Daily News Report
 
 ```bash
-python skills/ak-rss-digest/scripts/fetch_today_feed_items.py --format json
+npx skills add rookie-ricardo/erduo-skills --skill daily-news-report
 ```
 
-- By default it fetches the latest week's posts
-- To fetch a single day, add `--date YYYY-MM-DD --days 1`
+Autonomously fetches, filters, and summarizes high-quality tech news from multiple sources into a structured daily report.
 
-*Prompt Example:*
-> "Use `$ak-rss-digest` to pull the latest week's RSS posts, keep only items above 7/10, and format the result as a concise Chinese daily brief."
-
-### 📄 Directory Notes
-
-- `skills/ak-rss-digest/SKILL.md`: skill instructions and scoring rules
-- `skills/ak-rss-digest/scripts/fetch_today_feed_items.py`: RSS fetcher
-- `skills/ak-rss-digest/references/feeds.opml`: fixed feed bundle
-
----
-
-## ✨ Skill: Gemini Watermark Remover
-
-**Gemini Watermark Remover** is a utility that removes the visible Gemini AI watermark from images using reverse alpha blending. Ideal for batch processing or integrating watermark removal into pipelines.
-
-### 🚀 Key Features
-
-- **Precise Removal**:
-  - Pixel-perfect restoration for the bottom-right Gemini watermark.
-  - Uses pre-captured Alpha masks (48px/96px) for high-quality results.
-  
-- **Pure Python**:
-  - Core algorithm only depends on Pillow; lightweight and easy to modify.
-  - Includes a CLI tool for easy integration.
-
-### 💻 Usage
-
-This skill requires two parameters: existing image path and output image path.
-
-```bash
-python skills/gemini-watermark-remover/scripts/remove_watermark.py <input-image> <output-image>
-```
-
-- `input-image`: Path to the Gemini watermarked image
-- `output-image`: Path to save the cleaned image
-
-### 📄 Documentation
-
-- For algorithm details and detection rules, see `skills/gemini-watermark-remover/references/algorithm.md`.
-
----
-
-## ✨ Featured Skill: Daily News Report
-
-The **Daily News Report** is a sophisticated skill designed to autonomously fetch, filter, and summarize high-quality technical news from multiple sources.
-
-### 🏗 Architecture
-
-This skill utilizes a **Master-Worker** architecture with a smart orchestrator and specialized sub-agents.
+Uses a Master-Worker architecture: the master agent orchestrates and decides, while sub-agents fetch in parallel — including a headless browser worker for JS-rendered pages.
 
 ```mermaid
 graph TD
     User((User)) -->|Start| Master[Master Agent<br>Orchestrate/Monitor/Decide]
-    
+
     subgraph Execution Layer [SubAgent Layer]
         WorkerA[Worker A<br>WebFetch]
         WorkerB[Worker B<br>WebFetch]
@@ -111,68 +49,130 @@ graph TD
     Master -->|Update| Cache[Smart Cache]
 ```
 
-### 🚀 Key Features
+- Aggregates HackerNews, HuggingFace Papers, ProductHunt, and more across tiered sources
+- 10-point scoring + deduplication (URL + content hash)
+- Early stopping: halts once 20+ quality items are collected
+- Outputs Markdown reports to `NewsReport/`
 
-- **Multi-Source Fetching**:
-  - Aggregates content from HackerNews, HuggingFace Papers, etc.
-  
-- **Smart Filtering**:
-  - Filters for high-quality technical content, excluding marketing fluff.
-  
-- **Dynamic Scheduling**:
-  - Uses an "Early Stopping" mechanism: if enough high-quality items are found (e.g., 20 items), it stops fetching to save resources.
+---
 
-- **Headless Browser Support**:
-  - Handles complex, JS-rendered pages (e.g., ProductHunt) using MCP Chrome DevTools.
+## 📰 AK RSS Digest
 
-### 📄 Output Example
+```bash
+npx skills add rookie-ricardo/erduo-skills --skill ak-rss-digest
+```
 
-Reports are generated in structured Markdown format, stored in the `NewsReport/` directory.
+Curates high-quality articles from a fixed RSS/Atom feed bundle, focused on AI agents, frontier AI commentary, deep interviews, and high-signal essays.
 
-> **Daily News Report (2024-03-21)**
->
-> **1. Title of the Article**
-> - **Summary**: A concise summary of the article...
-> - **Key Points**: 
->   1. Point one
->   2. Point two
-> - **Source**: [Link](...) 
-> - **Rating**: ⭐⭐⭐⭐⭐
+- Predefined feed list, defaults to the latest 7 days
+- 10-point scoring, only outputs items above 7
+- Filters out paper summaries, vendor marketing, and SEO content
+- Chinese daily-brief style output: title, score, recommendation, summary, link
+
+```bash
+# Run the fetcher directly
+python skills/ak-rss-digest/scripts/fetch_today_feed_items.py --format json
+
+# Fetch a specific day
+python skills/ak-rss-digest/scripts/fetch_today_feed_items.py --date 2026-03-18 --days 1
+```
+
+*Prompt example:*
+> "Use `$ak-rss-digest` to pull the latest week's RSS posts, keep only items above 7/10, and format as a concise Chinese daily brief."
+
+---
+
+## ✍️ Transcript Polisher
+
+```bash
+npx skills add rookie-ricardo/erduo-skills --skill transcript-polisher
+```
+
+Polishes speech transcripts (interviews, talks, podcasts, meetings) into highly readable articles. Core principle: text polisher, not content summarizer — preserves the speaker's original words, metaphors, and personality.
+
+- Auto-detects solo speaker vs. multi-speaker dialogue mode
+- Noise reduction: removes filler words and meaningless interjections
+- Homophone correction + proper noun fixes
+- Semantic breathing: restructures paragraphs by meaning groups, not mechanical length
+- Auto-chunks long texts (~5000 chars), processes in parallel via sub-agents
+
+Input format:
+
+```
+视频标题：xxx
+视频作者：xxx
+视频时长：xxx
+
+--- 字幕内容 ---
+<transcript text>
+```
+
+Output format:
+
+```
+## 视频信息
+Title / Author / Duration
+
+## 导读
+Core ideas summary
+
+## 正文
+Polished full text
+```
+
+---
+
+## 🖼 Gemini Watermark Remover
+
+```bash
+npx skills add rookie-ricardo/erduo-skills --skill gemini-watermark-remover
+```
+
+Removes the visible Gemini AI watermark from the bottom-right corner of generated images using reverse alpha blending. Pixel-perfect restoration.
+
+- Pure Python, only depends on Pillow
+- Pre-captured alpha masks: 48px (small images) / 96px (images >1024×1024)
+- Algorithm: `original = (watermarked - alpha × logo) / (1 - alpha)`
+
+```bash
+python skills/gemini-watermark-remover/scripts/remove_watermark.py <input-image> <output-image>
+```
+
+For algorithm details, see `skills/gemini-watermark-remover/references/algorithm.md`
 
 ---
 
 ## 📂 Project Structure
 
-```bash
-├── .claude/
-│   └── agents/       # Agent personas & prompts
-├── skills/           # Executable skill definitions
-│   └── daily-news-report/  # The Daily News Report skill
-│   └── ak-rss-digest/      # Curated RSS digest skill
-├── NewsReport/       # Generated daily reports
-├── README.md         # Project documentation (Chinese by default)
-└── README_EN.md      # Project documentation (English)
 ```
-
-## 🛠 Usage
-
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/Start-to-DJ/erduo-skills.git
-    cd erduo-skills
-    ```
-
-2.  **Run with Agent**
-    Load this repository into your Agent environment (e.g., Claude Desktop, Zed with MCP). The Agent will automatically recognize skills such as `daily-news-report` and `ak-rss-digest`.
-
-    *Prompt Example:*
-    > "Generate today's news report."
-    
-    > "Use `$ak-rss-digest` to generate a curated RSS digest for the latest week."
+erduo-skills/
+├── .claude/
+│   └── agents/                     # Agent definitions
+├── skills/
+│   ├── daily-news-report/          # Daily News Report
+│   │   ├── SKILL.md
+│   │   ├── sources.json
+│   │   └── cache.json
+│   ├── ak-rss-digest/             # RSS Digest
+│   │   ├── SKILL.md
+│   │   ├── scripts/
+│   │   └── references/feeds.opml
+│   ├── transcript-polisher/        # Transcript Polisher
+│   │   ├── SKILL.md
+│   │   └── references/
+│   └── gemini-watermark-remover/   # Gemini Watermark Remover
+│       ├── SKILL.md
+│       ├── scripts/
+│       ├── assets/
+│       └── references/
+├── NewsReport/                     # Generated report archive
+├── README.md                       # Documentation (Chinese)
+└── README_EN.md                    # Documentation (English)
+```
 
 ## 🤝 Contributing
 
-Contributions are welcome! If you have a new skill idea, please check the `.claude/skills` directory for examples.
+Contributions welcome! Each skill is a self-contained directory under `skills/`, with a `SKILL.md` (skill definition) and related scripts/resources.
 
 ---
 
