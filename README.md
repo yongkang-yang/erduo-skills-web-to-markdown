@@ -6,13 +6,22 @@
 
 **Erduo Skills** 是一个 AI Agent 技能库，收录了一系列可被 Agent 直接调用的结构化技能。每个技能都是独立的、可组合的工作流单元，覆盖信息获取、内容处理、图像工具等场景。
 
+## 安装
+
+### 快捷安装（推荐）
+
+```bash
+npx skills add rookie-ricardo/erduo-skills
+```
+
 ## 技能一览
 
 | 技能 | 简介 | 调用方式 |
 |------|------|----------|
 | [每日日报](#-每日日报) | 多源抓取 + 智能筛选，自动生成技术日报 | Agent 调用 |
 | [AK RSS Digest](#-ak-rss-digest) | 固定 RSS 源精选摘要，10 分制打分过滤 | Agent 调用 / CLI |
-| [转录文本精修师](#-转录文本精修师) | 语音转录文本 → 可读文章，保留原汁原味 | Agent 调用 |
+| [转录精修师](#-转录精修师) | 语音转录文本 → 可读文章，保留原汁原味 | Agent 调用 |
+| [翻译精修师](#-翻译精修师) | 四步精翻工作流，支持中英 / 中日双向精翻 | Agent 调用 |
 | [Gemini 水印移除](#-gemini-水印移除) | 逆向 Alpha 混合去除 Gemini 图片水印 | CLI |
 
 ---
@@ -85,7 +94,7 @@ python skills/ak-rss-digest/scripts/fetch_today_feed_items.py --date 2026-03-18 
 
 ---
 
-## ✍️ 转录文本精修师
+## ✍️ 转录精修师
 
 ```bash
 npx skills add rookie-ricardo/erduo-skills --skill transcript-polisher
@@ -125,6 +134,31 @@ npx skills add rookie-ricardo/erduo-skills --skill transcript-polisher
 
 ---
 
+## 🌐 翻译精修师
+
+```bash
+npx skills add rookie-ricardo/erduo-skills --skill translate-polisher
+```
+
+用于高质量文章翻译与本地化，采用 **分析 → 初译 → 审校 → 终稿** 四步工作流。仅支持 `ZH↔EN`、`ZH↔JA` 双向翻译，不支持 `EN↔JA` 直译。
+
+- 支持文件路径、URL 或直接粘贴正文作为输入
+- 支持 `--from`、`--to`、`--audience`、`--style`、`--glossary` 参数
+- 翻译前先做术语提取、修辞映射、读者理解障碍分析
+- 内置 `EN↔ZH`、`ZH↔JA` 术语表，可与自定义术语表合并
+- 长文本会自动分块，由子 Agent 并行翻译后再合并审校
+- 内置 9 种风格预设，默认 `auto`，也支持自定义风格描述
+
+```
+/translate [--from <lang>] [--to <lang>] [--audience <audience>] [--style <style>] [--glossary <file>] <source>
+```
+
+*提示词示例：*
+> "翻译这篇文章 https://example.com/article"
+> "把这篇中文文章翻成英文，面向技术读者 --style technical"
+
+---
+
 ## 🖼 Gemini 水印移除
 
 ```bash
@@ -160,7 +194,10 @@ erduo-skills/
 │   │   ├── SKILL.md
 │   │   ├── scripts/
 │   │   └── references/feeds.opml
-│   ├── transcript-polisher/        # 转录文本精修师
+│   ├── transcript-polisher/        # 转录精修师
+│   │   ├── SKILL.md
+│   │   └── references/
+│   ├── translate-polisher/         # 翻译精修师
 │   │   ├── SKILL.md
 │   │   └── references/
 │   └── gemini-watermark-remover/   # Gemini 水印移除
@@ -171,6 +208,45 @@ erduo-skills/
 ├── NewsReport/                     # 生成的日报存档
 ├── README.md
 └── README_EN.md
+```
+
+## Claude Code 安装补充
+
+本仓库支持作为 Claude Code plugin marketplace 注册。
+
+### Claude Code 原生命令
+
+先添加 marketplace：
+
+```bash
+/plugin marketplace add rookie-ricardo/erduo-skills
+```
+
+再按功能安装 plugin bundle：
+
+```bash
+/plugin install research-workflows@erduo-skills
+/plugin install writing-workflows@erduo-skills
+/plugin install image-tools@erduo-skills
+```
+
+各 bundle 包含的 skills：
+
+- `research-workflows`：`ak-rss-digest`、`daily-news-report`
+- `writing-workflows`：`transcript-polisher`、`translate-polisher`
+- `image-tools`：`gemini-watermark-remover`
+
+本地测试可直接使用仓库路径：
+
+```bash
+/plugin marketplace add ./
+/plugin install research-workflows@erduo-skills
+```
+
+如果你使用 `skills` CLI，也可以直接添加当前仓库：
+
+```bash
+npx skills add rookie-ricardo/erduo-skills
 ```
 
 ## 🤝 贡献

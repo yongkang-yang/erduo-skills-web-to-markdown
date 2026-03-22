@@ -6,6 +6,14 @@
 
 **Erduo Skills** is an AI Agent skill library — a collection of structured, composable workflow units that agents can invoke directly. Skills cover information retrieval, content processing, image tooling, and more.
 
+## Installation
+
+### Quick Install (Recommended)
+
+```bash
+npx skills add rookie-ricardo/erduo-skills
+```
+
 ## Skills at a Glance
 
 | Skill | Description | Invocation |
@@ -13,6 +21,7 @@
 | [Daily News Report](#-daily-news-report) | Multi-source scraping + smart filtering → tech daily report | Agent |
 | [AK RSS Digest](#-ak-rss-digest) | Curated RSS digest with 10-point scoring | Agent / CLI |
 | [Transcript Polisher](#-transcript-polisher) | Speech transcript → readable article, preserving original voice | Agent |
+| [Translate Polisher](#-translate-polisher) | 4-step publication-quality translation for ZH↔EN and ZH↔JA | Agent |
 | [Gemini Watermark Remover](#-gemini-watermark-remover) | Reverse alpha blending to remove Gemini image watermarks | CLI |
 
 ---
@@ -122,6 +131,31 @@ Polished full text
 
 ---
 
+## 🌐 Translate Polisher
+
+```bash
+npx skills add rookie-ricardo/erduo-skills --skill translate-polisher
+```
+
+For high-quality article translation and localization, using a 4-step workflow: **Analyze → Draft → Critique → Final**. Supports only `ZH↔EN` and `ZH↔JA`, and does not support direct `EN↔JA` translation.
+
+- Accepts a file path, URL, or pasted text as input
+- Supports `--from`, `--to`, `--audience`, `--style`, and `--glossary`
+- Performs terminology extraction, figurative language mapping, and reader-friction analysis before translating
+- Includes built-in `EN↔ZH` and `ZH↔JA` glossaries, and can merge a custom glossary
+- Automatically chunks long texts and translates them in parallel with sub-agents before final review
+- Includes 9 built-in style presets, defaults to `auto`, and also accepts custom style descriptions
+
+```
+/translate [--from <lang>] [--to <lang>] [--audience <audience>] [--style <style>] [--glossary <file>] <source>
+```
+
+*Prompt examples:*
+> "Translate this article https://example.com/article"
+> "Translate this Chinese article into English for a technical audience --style technical"
+
+---
+
 ## 🖼 Gemini Watermark Remover
 
 ```bash
@@ -160,6 +194,9 @@ erduo-skills/
 │   ├── transcript-polisher/        # Transcript Polisher
 │   │   ├── SKILL.md
 │   │   └── references/
+│   ├── translate-polisher/         # Translate Polisher
+│   │   ├── SKILL.md
+│   │   └── references/
 │   └── gemini-watermark-remover/   # Gemini Watermark Remover
 │       ├── SKILL.md
 │       ├── scripts/
@@ -168,6 +205,45 @@ erduo-skills/
 ├── NewsReport/                     # Generated report archive
 ├── README.md                       # Documentation (Chinese)
 └── README_EN.md                    # Documentation (English)
+```
+
+## Claude Code Installation Supplement
+
+This repository can be registered as a Claude Code plugin marketplace.
+
+### Native Claude Code Commands
+
+Add the marketplace:
+
+```bash
+/plugin marketplace add rookie-ricardo/erduo-skills
+```
+
+Then install the plugin bundle you want:
+
+```bash
+/plugin install research-workflows@erduo-skills
+/plugin install writing-workflows@erduo-skills
+/plugin install image-tools@erduo-skills
+```
+
+Bundle contents:
+
+- `research-workflows`: `ak-rss-digest`, `daily-news-report`
+- `writing-workflows`: `transcript-polisher`, `translate-polisher`
+- `image-tools`: `gemini-watermark-remover`
+
+For local testing, use the repository path directly:
+
+```bash
+/plugin marketplace add ./
+/plugin install research-workflows@erduo-skills
+```
+
+If you use the `skills` CLI, you can also add this repository directly:
+
+```bash
+npx skills add rookie-ricardo/erduo-skills
 ```
 
 ## 🤝 Contributing

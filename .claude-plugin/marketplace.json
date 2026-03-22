@@ -1,0 +1,79 @@
+{
+  "name": "erduo-skills",
+  "owner": {
+    "name": "Rookie Ricardo"
+  },
+  "metadata": {
+    "description": "Claude Code marketplace for Erduo structured workflows and utilities",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "research-workflows",
+      "description": "Research and news gathering workflows for curated digests and daily reports",
+      "source": "./",
+      "strict": false,
+      "version": "0.1.0",
+      "author": {
+        "name": "Rookie Ricardo"
+      },
+      "homepage": "https://github.com/rookie-ricardo/erduo-skills",
+      "repository": "https://github.com/rookie-ricardo/erduo-skills",
+      "keywords": [
+        "research",
+        "rss",
+        "news",
+        "digest"
+      ],
+      "category": "productivity",
+      "skills": [
+        "./skills/ak-rss-digest",
+        "./skills/daily-news-report"
+      ]
+    },
+    {
+      "name": "writing-workflows",
+      "description": "Writing and translation workflows for transcript cleanup and high-quality translation",
+      "source": "./",
+      "strict": false,
+      "version": "0.1.0",
+      "author": {
+        "name": "Rookie Ricardo"
+      },
+      "homepage": "https://github.com/rookie-ricardo/erduo-skills",
+      "repository": "https://github.com/rookie-ricardo/erduo-skills",
+      "keywords": [
+        "writing",
+        "translation",
+        "transcript",
+        "editing"
+      ],
+      "category": "productivity",
+      "skills": [
+        "./skills/transcript-polisher",
+        "./skills/translate-polisher"
+      ]
+    },
+    {
+      "name": "image-tools",
+      "description": "Image utility workflows including Gemini watermark removal",
+      "source": "./",
+      "strict": false,
+      "version": "0.1.0",
+      "author": {
+        "name": "Rookie Ricardo"
+      },
+      "homepage": "https://github.com/rookie-ricardo/erduo-skills",
+      "repository": "https://github.com/rookie-ricardo/erduo-skills",
+      "keywords": [
+        "image",
+        "watermark",
+        "gemini"
+      ],
+      "category": "productivity",
+      "skills": [
+        "./skills/gemini-watermark-remover"
+      ]
+    }
+  ]
+}
