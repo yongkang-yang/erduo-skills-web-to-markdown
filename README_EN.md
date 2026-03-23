@@ -139,7 +139,7 @@ npx skills add rookie-ricardo/erduo-skills --skill translate-polisher
 
 For high-quality article translation and localization, using a 4-step workflow: **Analyze → Draft → Critique → Final**. Supports only `ZH↔EN` and `ZH↔JA`, and does not support direct `EN↔JA` translation.
 
-- Accepts a file path, URL, or pasted text as input
+- Accepts a file path, URL, or pasted text as input; URLs are fetched via `r.jina.ai`, and the run stops if the full article body cannot be retrieved
 - Supports `--from`, `--to`, `--audience`, `--style`, and `--glossary`
 - Performs terminology extraction, figurative language mapping, and reader-friction analysis before translating
 - Includes built-in `EN↔ZH` and `ZH↔JA` glossaries, and can merge a custom glossary

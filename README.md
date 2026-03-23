@@ -142,7 +142,7 @@ npx skills add rookie-ricardo/erduo-skills --skill translate-polisher
 
 用于高质量文章翻译与本地化，采用 **分析 → 初译 → 审校 → 终稿** 四步工作流。仅支持 `ZH↔EN`、`ZH↔JA` 双向翻译，不支持 `EN↔JA` 直译。
 
-- 支持文件路径、URL 或直接粘贴正文作为输入
+- 支持文件路径、URL 或直接粘贴正文作为输入；URL 默认通过 `r.jina.ai` 抓正文，抓不到则终止并提示用户自行提供正文
 - 支持 `--from`、`--to`、`--audience`、`--style`、`--glossary` 参数
 - 翻译前先做术语提取、修辞映射、读者理解障碍分析
 - 内置 `EN↔ZH`、`ZH↔JA` 术语表，可与自定义术语表合并
