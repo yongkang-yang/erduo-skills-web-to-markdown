@@ -258,7 +258,7 @@ Then install the plugin bundle you want:
 Bundle contents:
 
 - `research-workflows`: `ak-rss-digest`, `daily-news-report`
-- `writing-workflows`: `transcript-polisher`, `translate-polisher`
+- `writing-workflows`: `transcript-polisher`, `translate-polisher`, `web-to-markdown`
 - `image-tools`: `gemini-watermark-remover`
 
 For local testing, use the repository path directly:

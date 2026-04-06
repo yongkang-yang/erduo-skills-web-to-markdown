@@ -46,12 +46,15 @@
         "writing",
         "translation",
         "transcript",
-        "editing"
+        "editing",
+        "web",
+        "markdown"
       ],
       "category": "productivity",
       "skills": [
         "./skills/transcript-polisher",
-        "./skills/translate-polisher"
+        "./skills/translate-polisher",
+        "./skills/web-to-markdown"
       ]
     },
     {

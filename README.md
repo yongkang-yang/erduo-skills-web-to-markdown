@@ -261,7 +261,7 @@ erduo-skills/
 各 bundle 包含的 skills：
 
 - `research-workflows`：`ak-rss-digest`、`daily-news-report`
-- `writing-workflows`：`transcript-polisher`、`translate-polisher`
+- `writing-workflows`：`transcript-polisher`、`translate-polisher`、`web-to-markdown`
 - `image-tools`：`gemini-watermark-remover`
 
 本地测试可直接使用仓库路径：
